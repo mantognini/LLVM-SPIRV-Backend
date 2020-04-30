@@ -44,18 +44,18 @@ bool SPIRVCallLowering::lowerReturn(MachineIRBuilder &MIRBuilder,
 
 // Based on the LLVM function attributes, get a SPIR-V FunctionControl
 static uint32_t getFunctionControl(const Function &F) {
-  uint32_t funcControl = FunctionControl::None;
+  uint32_t funcControl = (uint32_t)FunctionControl::None;
   if (F.hasFnAttribute(Attribute::AttrKind::AlwaysInline)) {
-    funcControl |= FunctionControl::Inline;
+    funcControl |= (uint32_t)FunctionControl::Inline;
   }
   if (F.hasFnAttribute(Attribute::AttrKind::ReadNone)) {
-    funcControl |= FunctionControl::Const;
+    funcControl |= (uint32_t)FunctionControl::Const;
   }
   if (F.hasFnAttribute(Attribute::AttrKind::ReadOnly)) {
-    funcControl |= FunctionControl::Pure;
+    funcControl |= (uint32_t)FunctionControl::Pure;
   }
   if (F.hasFnAttribute(Attribute::AttrKind::NoInline)) {
-    funcControl |= FunctionControl::DontInline;
+    funcControl |= (uint32_t)FunctionControl::DontInline;
   }
   return funcControl;
 }
@@ -117,16 +117,16 @@ bool SPIRVCallLowering::lowerFormalArguments(
   if (F.getCallingConv() == CallingConv::SPIR_KERNEL) {
     auto execModel = ExecutionModel::Kernel;
     auto MIB = MIRBuilder.buildInstr(SPIRV::OpEntryPoint)
-                   .addImm(execModel)
+                   .addImm((uint32_t)execModel)
                    .addUse(funcVReg);
     addStringImm(F.getName(), MIB);
   } else if (F.getLinkage() == GlobalValue::LinkageTypes::ExternalLinkage) {
     auto MIB = MIRBuilder.buildInstr(SPIRV::OpDecorate)
                    .addUse(funcVReg)
-                   .addImm(Decoration::LinkageAttributes);
+                   .addImm((uint32_t)Decoration::LinkageAttributes);
     addStringImm(F.getGlobalIdentifier(), MIB);
     auto lnk = F.isDeclaration() ? LinkageType::Import : LinkageType::Export;
-    MIB.addImm(lnk);
+    MIB.addImm((uint32_t)lnk);
   }
 
   return true;
@@ -193,9 +193,9 @@ bool SPIRVCallLowering::lowerCall(MachineIRBuilder &MIRBuilder,
 
     // Emit the OpFunctionCall and its args
     auto MIB = MIRBuilder.buildInstr(SPIRV::OpFunctionCall)
-                   .addDef(resVReg)
-                   .addUse(TR->getSPIRVTypeID(retType))
-                   .add(Info.Callee);
+        .addDef(resVReg)
+        .addUse(TR->getSPIRVTypeID(retType))
+        .add(Info.Callee);
 
     for (const auto &arg : Info.OrigArgs) {
       assert(arg.Regs.size() == 1 && "Call arg has multiple VRegs");

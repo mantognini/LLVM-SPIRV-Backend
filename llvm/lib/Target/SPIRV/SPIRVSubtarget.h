@@ -61,6 +61,10 @@ private:
   const bool openCLFullProfile;
   const bool openCLImageSupport;
 
+  void updateCapabilitiesFromFeatures();
+  void enableFeatureCapability(const Capability Cap);
+  void enableFeatureCapabilities(const ArrayRef<Capability> Caps);
+
   // TODO Some of these fields might work without unique_ptr.
   //      But they are shared with other classes, so if the SPIRVSubtarget
   //      moves, not relying on unique_ptr breaks things.
@@ -70,7 +74,7 @@ private:
 
   std::unordered_set<Extension::Extension> availableExtensions;
   std::unordered_set<ExtInstSet> availableExtInstSets;
-  std::unordered_set<Capability::Capability> availableCaps;
+  std::unordered_set<Capability> availableCaps;
 
   // The legalizer and instruction selector both rely on the set of available
   // extensions, capabilities, register bank information, and so on.
@@ -94,6 +98,20 @@ protected:
   bool isDummyMode;
 
 public:
+#define MAKE_CAP_FEATURE_FIELDS(Enum, Var, Val, Caps, Exts, MinVer, MaxVer)    \
+  bool Has##Var : 1;
+#define DEF_CAP_FEATURES(EnumName, DefCommand)                                 \
+  DefCommand(EnumName, MAKE_CAP_FEATURE_FIELDS)
+
+  // TODO: Finish writing the tablegen feature defs.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-private-field"
+  DEF_CAP_FEATURES(Capability, DEF_Capability)
+#pragma GCC diagnostic pop
+
+#undef DEF_CAP_FEATURES
+#undef MAKE_CAP_FEATURE_FIELDS
+
   // This constructor initializes the data members to match that
   // of the specified triple.
   SPIRVSubtarget(const Triple &TT, const std::string &CPU,
@@ -115,7 +133,7 @@ public:
 
   uint32_t getTargetSPIRVVersion() const { return targetSPIRVVersion; };
 
-  bool canUseCapability(Capability::Capability c) const;
+  bool canUseCapability(Capability c) const;
   bool canUseExtension(Extension::Extension e) const;
   bool canUseExtInstSet(ExtInstSet e) const;
 

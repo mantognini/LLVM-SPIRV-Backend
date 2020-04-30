@@ -32,4 +32,55 @@ def SPIRV : Target {
   let AssemblyWriters = [SPIRVInstPrinter];
 }
 
+class CapabilityFeature<string Name, string LowerName, int id,
+                        list<SubtargetFeature> ImpliedCaps = [],
+                        string Desc = ""> :
+  SubtargetFeature<LowerName, "Has"#Name, "true", Desc, ImpliedCaps>
+{
+  // Not actually used?
+  int Id = id;
+}
+// TODO add features for the rest of the capabilities
+def FeatureMatrix : CapabilityFeature<"Matrix", "matrix", 0>;
+def FeatureShader : CapabilityFeature<"Shader", "shader", 1, [FeatureMatrix]>;
+def FeatureGeometry : CapabilityFeature<"Geometry", "geometry", 2, [FeatureShader]>;
+def FeatureTessellation : CapabilityFeature<"Tessellation", "tessellation", 3, [FeatureShader]>;
+def FeatureAddresses : CapabilityFeature<"Addresses", "addresses", 4>;
+def FeatureLinkage : CapabilityFeature<"Linkage", "linkage", 5>;
+def FeatureKernel : CapabilityFeature<"Kernel", "kernel", 6>;
+def FeatureVector16 : CapabilityFeature<"Vector16", "vector16", 7, [FeatureKernel]>;
+def FeatureFloat16Buffer : CapabilityFeature<"Float16Buffer", "f16-buffer", 8, [FeatureKernel]>;
+def FeatureFloat16 : CapabilityFeature<"Float16", "f16", 9>;
+def FeatureFloat64 : CapabilityFeature<"Float64", "f64", 10>;
+def FeatureInt64 : CapabilityFeature<"Int64", "i64", 11>;
+def FeatureInt64Atomics : CapabilityFeature<"Int64Atomics", "i64-atomics", 12, [FeatureInt64]>;
+def FeatureImageBasic : CapabilityFeature<"ImageBasic", "image-basic", 13, [FeatureKernel]>;
+def FeatureImageReadWrite : CapabilityFeature<"ImageReadWrite", "image-read-write", 14, [FeatureImageBasic]>;
+def FeatureImageMipmap : CapabilityFeature<"ImageMipmap", "image-mipmap", 15, [FeatureImageBasic]>;
+def FeaturePipes : CapabilityFeature<"Pipes", "pipes", 17, [FeatureKernel]>;
+def FeatureGroups : CapabilityFeature<"Groups", "groups", 18>;
+def FeatureDeviceEnqueue : CapabilityFeature<"DeviceEnqueue", "device-enqueue", 19>;
+def FeatureLiteralSampler : CapabilityFeature<"LiteralSampler", "literal-sampler", 20, [FeatureKernel]>;
+def FeatureAtomicStorage : CapabilityFeature<"AtomicStorage", "atomic-storage", 21, [FeatureShader]>;
+def FeatureInt16 : CapabilityFeature<"Int16", "i16", 22>;
+def FeatureInt8 : CapabilityFeature<"Int8", "i8", 39>;
+def FeatureStorageBuffer16BitAccess :
+  CapabilityFeature<"StorageBuffer16BitAccess", "storage-buffer-16bit-access", 4433>;
+def FeatureStorageUniform16 :
+  CapabilityFeature<"StorageUniform16", "storage-uniform-16", 4434, [FeatureStorageBuffer16BitAccess]>;
+def FeatureStorageInputOutput16 :
+  CapabilityFeature<"StorageInputOutput16", "storage-input-output-16", 4436>;
+def FeatureVariablePointersStorageBuffer :
+  CapabilityFeature<"VariablePointersStorageBuffer", "variable-pointers-storage-buffer", 4441, [FeatureShader]>;
+def FeatureVariablePointers : CapabilityFeature<"VariablePointers", "variable-pointers", 4442>;
+def FeatureStorageBuffer8BitAccess :
+  CapabilityFeature<"StorageBuffer8BitAccess", "storage-buffer-8bit-access", 4448>;
+def FeatureUniformAndStorageBuffer8BitAccess :
+  CapabilityFeature<"UniformAndStorageBuffer8BitAccess", "uniform-and-storage-buffer-8bit-access", 4449,
+    [FeatureStorageBuffer8BitAccess]>;
+def FeatureVulkanMemoryModelKHR : CapabilityFeature<"VulkanMemoryModelKHR", "vulkan-memory-model", 5345>;
+def FeatureVulkanMemoryModelDeviceScopeKHR :
+  CapabilityFeature<"VulkanMemoryModelDeviceScopeKHR", "vulkan-memory-model-device-scope", 5346>;
+def FeaturePhysicalStorageBufferAddresses :
+  CapabilityFeature<"PhysicalStorageBufferAddresses", "physical-storage-buffer-addresses", 5347, [FeatureShader]>;
 
